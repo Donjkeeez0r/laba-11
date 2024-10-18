@@ -1,0 +1,63 @@
+import tkinter as tk
+import random
+
+# функция для получения случайного выбора компьютера
+def get_computer_choice():
+    choices = ['Камень', 'Ножницы', 'Бумага']
+    return random.choice(choices)
+
+# функция которая определяет победителя
+def determine_winner(user_choice, computer_choice):
+    if user_choice == computer_choice:
+        return "Ничья!"
+    elif (user_choice == 'Камень' and computer_choice == 'Ножницы') or \
+         (user_choice == 'Ножницы' and computer_choice == 'Бумага') or \
+         (user_choice == 'Бумага' and computer_choice == 'Камень'):
+        return "Вы победили!"
+    else:
+        return "Компьютер победил!"
+
+
+def play_game(user_choice):
+    computer_choice = get_computer_choice()
+    result = determine_winner(user_choice, computer_choice)
+
+
+    label_user_choice.config(text=f"Ваш выбор: {user_choice}")
+    label_computer_choice.config(text=f"Выбор компьютера: {computer_choice}")
+    label_result.config(text=f"Результат: {result}")
+
+# функция которая центрирует окно игры
+def center_window(win, width=400, height=300):
+    screen_width = win.winfo_screenwidth()
+    screen_height = win.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    win.geometry(f'{width}x{height}+{x}+{y}')
+
+window = tk.Tk()
+window.title("Камень, Ножницы, Бумага")
+
+center_window(window)
+
+# отображение резултата
+label_user_choice = tk.Label(window, text="Ваш выбор: ", font=("Arial", 12))
+label_user_choice.pack(pady=10)
+
+label_computer_choice = tk.Label(window, text="Выбор компьютера: ", font=("Arial", 12))
+label_computer_choice.pack(pady=10)
+
+label_result = tk.Label(window, text="Результат: ", font=("Arial", 14, "bold"))
+label_result.pack(pady=20)
+
+# кнопки
+btn_rock = tk.Button(window, text="Камень", width=15, command=lambda: play_game('Камень'))
+btn_rock.pack(pady=5)
+
+btn_scissors = tk.Button(window, text="Ножницы", width=15, command=lambda: play_game('Ножницы'))
+btn_scissors.pack(pady=5)
+
+btn_paper = tk.Button(window, text="Бумага", width=15, command=lambda: play_game('Бумага'))
+btn_paper.pack(pady=5)
+
+window.mainloop()
