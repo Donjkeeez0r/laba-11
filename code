@@ -1,63 +1,140 @@
 import tkinter as tk
 import random
+from PIL import Image, ImageTk  
+import time
 
-# функция для получения случайного выбора компьютера
+
 def get_computer_choice():
     choices = ['Камень', 'Ножницы', 'Бумага']
     return random.choice(choices)
 
-# функция которая определяет победителя
+
 def determine_winner(user_choice, computer_choice):
     if user_choice == computer_choice:
         return "Ничья!"
     elif (user_choice == 'Камень' and computer_choice == 'Ножницы') or \
-         (user_choice == 'Ножницы' and computer_choice == 'Бумага') or \
-         (user_choice == 'Бумага' and computer_choice == 'Камень'):
+            (user_choice == 'Ножницы' and computer_choice == 'Бумага') or \
+            (user_choice == 'Бумага' and computer_choice == 'Камень'):
         return "Вы победили!"
     else:
         return "Компьютер победил!"
 
 
-def play_game(user_choice):
+def countdown(n, user_choice):
+    if n > 0:
+        label_result.config(text=f"Игра начнётся через: {n}")
+        window.after(1000, countdown, n - 1, user_choice)  
+        animate_choices()
+    else:
+        finalize_game(user_choice)
+
+
+def animate_choices():
+    random_choice_user = random.choice(['Камень', 'Ножницы', 'Бумага'])
+    random_choice_computer = random.choice(['Камень', 'Ножницы', 'Бумага'])
+    label_user_choice_image.config(image=img_dict[random_choice_user])
+    label_computer_choice_image.config(image=img_dict[random_choice_computer])
+
+
+def finalize_game(user_choice):
     computer_choice = get_computer_choice()
+    label_user_choice_image.config(image=img_dict[user_choice])
+    label_computer_choice_image.config(image=img_dict[computer_choice])
+
     result = determine_winner(user_choice, computer_choice)
-
-
-    label_user_choice.config(text=f"Ваш выбор: {user_choice}")
-    label_computer_choice.config(text=f"Выбор компьютера: {computer_choice}")
     label_result.config(text=f"Результат: {result}")
 
-# функция которая центрирует окно игры
-def center_window(win, width=400, height=300):
+
+def show_result_with_countdown(user_choice):
+    label_result.config(text="Идёт игра...")
+    countdown(5, user_choice)  
+
+
+def reset_game():
+    label_user_choice_image.config(image=img_empty)
+    label_computer_choice_image.config(image=img_empty)
+    label_result.config(text="Результат: ")
+
+
+def exit_game():
+    window.quit()
+
+
+def center_window(win, width=550, height=500):
     screen_width = win.winfo_screenwidth()
     screen_height = win.winfo_screenheight()
     x = (screen_width // 2) - (width // 2)
     y = (screen_height // 2) - (height // 2)
     win.geometry(f'{width}x{height}+{x}+{y}')
 
+
 window = tk.Tk()
 window.title("Камень, Ножницы, Бумага")
 
 center_window(window)
 
-# отображение резултата
-label_user_choice = tk.Label(window, text="Ваш выбор: ", font=("Arial", 12))
-label_user_choice.pack(pady=10)
 
-label_computer_choice = tk.Label(window, text="Выбор компьютера: ", font=("Arial", 12))
-label_computer_choice.pack(pady=10)
+img_rock = ImageTk.PhotoImage(Image.open("rock.png").resize((100, 100)))
+img_scissors = ImageTk.PhotoImage(Image.open("scissors.png").resize((100, 100)))
+img_paper = ImageTk.PhotoImage(Image.open("paper.png").resize((100, 100)))
+img_empty = ImageTk.PhotoImage(Image.new('RGB', (100, 100), color='white'))
+
+img_dict = {
+    'Камень': img_rock,
+    'Ножницы': img_scissors,
+    'Бумага': img_paper
+}
+
+
+frame_choices = tk.Frame(window)
+frame_choices.pack(pady=20)
+
+
+label_user = tk.Label(frame_choices, text="Ваш выбор:", font=("Arial", 12))
+label_user.grid(row=0, column=0, padx=10)
+
+label_user_choice_image = tk.Label(frame_choices, image=img_empty)
+label_user_choice_image.grid(row=1, column=0, padx=10)
+
+
+label_computer = tk.Label(frame_choices, text="Выбор компьютера:", font=("Arial", 12))
+label_computer.grid(row=0, column=1, padx=10)
+
+label_computer_choice_image = tk.Label(frame_choices, image=img_empty)
+label_computer_choice_image.grid(row=1, column=1, padx=10)
+
 
 label_result = tk.Label(window, text="Результат: ", font=("Arial", 14, "bold"))
 label_result.pack(pady=20)
 
-# кнопки
-btn_rock = tk.Button(window, text="Камень", width=15, command=lambda: play_game('Камень'))
+
+frame_buttons = tk.Frame(window)
+frame_buttons.pack(pady=20)
+
+
+label_instruction = tk.Label(frame_buttons, text="Выберите за что вы хотите играть:", font=("Arial", 12, "bold"))
+label_instruction.pack(pady=10)
+
+
+btn_rock = tk.Button(frame_buttons, text="Камень", width=15, command=lambda: show_result_with_countdown('Камень'))
 btn_rock.pack(pady=5)
 
-btn_scissors = tk.Button(window, text="Ножницы", width=15, command=lambda: play_game('Ножницы'))
+btn_scissors = tk.Button(frame_buttons, text="Ножницы", width=15, command=lambda: show_result_with_countdown('Ножницы'))
 btn_scissors.pack(pady=5)
 
-btn_paper = tk.Button(window, text="Бумага", width=15, command=lambda: play_game('Бумага'))
+btn_paper = tk.Button(frame_buttons, text="Бумага", width=15, command=lambda: show_result_with_countdown('Бумага'))
 btn_paper.pack(pady=5)
+
+
+frame_bottom_buttons = tk.Frame(window)
+frame_bottom_buttons.pack(pady=20)
+
+
+btn_reset = tk.Button(frame_bottom_buttons, text="Начать заново", width=15, command=reset_game)
+btn_reset.pack(side=tk.LEFT, padx=10)
+
+
+btn_exit = tk.Button(frame_bottom_buttons, text="Выйти", width=15, command=exit_game)
+btn_exit.pack(side=tk.LEFT, padx=10)
 
 window.mainloop()
